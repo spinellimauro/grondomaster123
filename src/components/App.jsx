@@ -1,7 +1,8 @@
 import React from "react";
 import Home from "../containers/home";
+import "./global.css";
 
-let App = () => (
+const App = () => (
   <div>
     <Home />
   </div>

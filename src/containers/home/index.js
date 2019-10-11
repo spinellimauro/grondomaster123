@@ -2,23 +2,34 @@ import React from "react";
 import { connect } from "react-redux";
 import { Actions } from "./actions";
 import { bindActionCreators } from "redux";
-import img from "../../assets/images/loading_spinner.gif";
-import { Table } from "antd";
-import firebase from 'firebase';
-import { FirebaseConfiguration } from '../../config/firebase';
+import { Table, Row, Col, Card, Button, Icon, Input, Modal } from "antd";
+import firebase from "firebase";
+import { FirebaseConfiguration } from "../../config/firebase";
+import { rowStyle, colStyle, gutter } from "./styles";
+import LayoutWrapper from "../../components/layoutWrapper";
+import PageHeader from "../../components/pageHeader";
 
-
-let styles = {
-  backgroundColor: "#665EFF",
-  width: "250px",
-  height: "100px",
-  borderRadius: "100px",
-  display: "block",
-  margin: "50px auto",
-  fontSize: "15px",
-  border: "3px solid",
-  color: "white"
-};
+const DescriptionItem = ({ title, content }) => (
+  <div
+    style={{
+      fontSize: 14,
+      lineHeight: "20px",
+      marginBottom: 7,
+      color: "rgba(0,0,0,0.65)"
+    }}
+  >
+    <p
+      style={{
+        marginRight: 8,
+        display: "inline-block",
+        color: "rgba(0,0,0,0.85)"
+      }}
+    >
+      {title}:
+    </p>
+    {content != "" ? content : "-"}
+  </div>
+);
 
 class Home extends React.Component {
   componentDidMount() {
@@ -28,118 +39,106 @@ class Home extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      nombreJugador: "", 
-      hover: false,
-      hoverColombia : false, 
+      addPlayerModalVisible: false,
+      actualPlayer: undefined
     };
-
-    this.setNombreJugador = this.setNombreJugador.bind(this);
   }
-  
-  setNombreJugador (event) {
-    this.setState({ nombreJugador: event.target.value });
-  };
+
+  addPlayerModal(player) {
+    return (
+      <Modal
+        title={player.name}
+        visible={this.state.addPlayerModalVisible}
+        onCancel={e => {
+          this.setState({
+            addPlayerModalVisible: false
+          });
+        }}
+        width={700}
+        footer={null}
+      >
+        <Row>
+          <Col md={24} style={colStyle}>
+            <Row style={rowStyle}>
+              <Col md={12} style={colStyle}>
+                <DescriptionItem
+                  title="Nivel"
+                  content={player.overall_rating}
+                />
+                <DescriptionItem title="ID" content={player.id} />
+              </Col>
+              <Col md={12} style={colStyle}>
+                <DescriptionItem title="Valor" content={player.value} />
+              </Col>
+            </Row>
+          </Col>
+        </Row>
+      </Modal>
+    );
+  }
 
   render() {
     const { actions, reducer } = this.props;
     return (
-      <div>
-        <div style={{ textAlign: "center" }}>
-            <label id="name">DT: {reducer.dT}</label>
-            <hr />
-            <label id="name">Dinero: {reducer.dinero}</label>
-            <hr />
-            <label id="name">Cantidad de Jugadores: {reducer.cantidadDeJugadores}</label>
-        </div>
-
-        <div style={{ textAlign: "center" }}>
-            <label id ="name">Nombre jugador</label>
-            <hr />
-            <form>
-            <input type="text" name="deporte" placeholder="Nombre jugador" value = {this.state.nombreJugador} onChange = {this.setNombreJugador}></input>
-            </form>
-            
-        </div>
-
-        <Table
-          columns={[
-            {
-              title: "Nombre",
-              dataIndex: "name",
-          
-            },
-            {
-              title: "Nivel",
-              dataIndex: "overall_rating",
-              key: "overall_rating"
-            },
-            {
-              title: "Valor",
-              dataIndex: "value",
-              key: "value"
-            },
-          ]}
-          dataSource={reducer.jugadores}
-        />
-
-
-        <button
-          style={
-            !this.state.hoverColombia
-              ? styles
-              : { ...styles, backgroundColor: "#FF9057" }
-          }
-          onMouseOut={() => {
-            this.setState({ hoverColombia: false });
-          }}
-          onMouseOver={() => {
-            this.setState({ hoverColombia: true });
-          }}
-          onClick={() => {
-            actions.buscadorSofifa({
-              nombreJugador: this.state.nombreJugador
-            });
-          }}
-          id="buscadorSofifa"
-        >
-          Buscar jugador
-        </button>
-
-        <button
-          style={
-            !this.state.hover
-              ? styles
-              : { ...styles, backgroundColor: "#FF9057" }
-          }
-          onMouseOut={() => {
-            this.setState({ hover: false });
-          }}
-          onMouseOver={() => {
-            this.setState({ hover: true });
-          }}
-          onClick={() => {
-            actions.getRandomName();
-          }}
-          id="getRandomName"
-        >
-          Get Random Name
-        </button>
-        {reducer.loading && (
-          <div style={{ textAlign: "center" }}>
-            <img src={img} alt="loading" />
-            <h1>LOADING</h1>
-          </div>
-        )}
-        {reducer.randomName !== null && !reducer.loading && (
-          <div style={{ textAlign: "center" }}>
-            <label id="name">Name: {reducer.randomName.name}</label>
-            <hr />
-            <label id="surname">Surname: {reducer.randomName.surname}</label>
-            <hr />
-            <label id="region">Region: {reducer.randomName.region}</label>
-          </div>
-        )}
-      </div>
+      <LayoutWrapper>
+        <PageHeader>JUGADORES</PageHeader>
+        <Row style={rowStyle} gutter={gutter} justify="start">
+          <Col md={24} style={colStyle}>
+            <Card>
+              <Input.Search
+                placeholder="Filtrar"
+                onSearch={value =>
+                  actions.buscadorSofifa({
+                    nombreJugador: value
+                  })
+                }
+                style={{ marginBottom: 16 }}
+                enterButton
+              />
+              <Table
+                rowKey={record => record.id}
+                columns={[
+                  {
+                    title: "Nombre",
+                    dataIndex: "name",
+                    key: "name"
+                  },
+                  {
+                    title: "Nivel",
+                    dataIndex: "overall_rating",
+                    key: "overall_rating"
+                  },
+                  {
+                    title: "Valor",
+                    dataIndex: "value",
+                    key: "value"
+                  },
+                  {
+                    title: "",
+                    key: "action",
+                    render: (text, record) => (
+                      <Button
+                        onClick={() =>
+                          this.setState({
+                            addPlayerModalVisible: true,
+                            actualPlayer: record
+                          })
+                        }
+                      >
+                        Guardar jugador <Icon type="save" />
+                      </Button>
+                    )
+                  }
+                ]}
+                pagination={{ pageSize: 100 }}
+                dataSource={reducer.jugadores}
+              />
+            </Card>
+          </Col>
+        </Row>
+        {this.state.actualPlayer != undefined &&
+          this.addPlayerModal(this.state.actualPlayer)}
+      </LayoutWrapper>
     );
   }
 }
