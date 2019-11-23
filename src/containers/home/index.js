@@ -6,8 +6,8 @@ import Modal from "@material-ui/core/Modal";
 import MaterialTable from "material-table";
 import Button from "@material-ui/core/Button";
 import TextField from "@material-ui/core/TextField";
-import { rowStyle, colStyle, gutter } from "./styles";
-import LayoutWrapper from "../../components/layoutWrapper";
+import CardActions from "@material-ui/core/CardActions";
+import { SimpleContainer } from "../../components/container";
 
 class Home extends React.Component {
   constructor(props) {
@@ -34,6 +34,50 @@ class Home extends React.Component {
   savePlayer = request => {
     this.props.actions.savePlayer(request);
   };
+
+  playersTable() {
+    const { reducer } = this.props;
+    const { columns } = this.state;
+    return (
+      <MaterialTable
+        title="Jugadores"
+        columns={columns}
+        data={reducer.jugadores}
+        actions={[
+          {
+            icon: "save_alt",
+            tooltip: "Guardar jugador",
+            onClick: (event, rowData) => {
+              this.setState({
+                addPlayerModalVisible: true,
+                actualPlayer: rowData
+              });
+            }
+          }
+        ]}
+        localization={{
+          pagination: {
+            labelDisplayedRows: "{from}-{to} de {count}",
+            labelRowsSelect: "filas"
+          },
+          toolbar: {
+            nRowsSelected: "{0} fila(s) seleccionadas",
+            searchTooltip: "Filtrar",
+            searchPlaceholder: "Filtrar"
+          },
+          header: {
+            actions: "Acciones"
+          },
+          body: {
+            emptyDataSourceMessage: "No se encontraron resultados.",
+            filterRow: {
+              filterTooltip: "Filtrar"
+            }
+          }
+        }}
+      />
+    );
+  }
 
   addPlayerModal() {
     const { addPlayerModalVisible, actualPlayer, trainer } = this.state;
@@ -67,6 +111,11 @@ class Home extends React.Component {
             color="primary"
             onClick={() => {
               this.savePlayer({ player: actualPlayer, trainerName: trainer });
+              this.setState({
+                addPlayerModalVisible: false,
+                actualPlayer: { name: "", overall_rating: "" },
+                trainer: ""
+              });
             }}
           >
             Guardar jugador
@@ -77,65 +126,34 @@ class Home extends React.Component {
   }
 
   render() {
-    const { reducer } = this.props;
-    const { columns, player } = this.state;
+    const { player } = this.state;
     return (
-      <LayoutWrapper>
-        <TextField
-          id="standard-basic"
-          label="Nombre del jugador"
-          onChange={event => this.setState({ player: event.target.value })}
-          value={player}
-          onKeyDown={e => {
-            e.keyCode === 13 && this.searchPlayer(player);
-          }}
-        />
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={() => this.searchPlayer(player)}
+      <SimpleContainer>
+        <CardActions
+          style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
         >
-          Buscar jugadores
-        </Button>
-        <MaterialTable
-          title="Jugadores"
-          columns={columns}
-          data={reducer.jugadores}
-          actions={[
-            {
-              icon: "save_alt",
-              tooltip: "Guardar jugador",
-              onClick: (event, rowData) => {
-                this.setState({
-                  addPlayerModalVisible: true,
-                  actualPlayer: rowData
-                });
-              }
-            }
-          ]}
-          localization={{
-            pagination: {
-              labelDisplayedRows: "{from}-{to} de {count}",
-              labelRowsSelect: "filas"
-            },
-            toolbar: {
-              nRowsSelected: "{0} fila(s) seleccionadas",
-              searchTooltip: "Filtrar",
-              searchPlaceholder: "Filtrar"
-            },
-            header: {
-              actions: "Acciones"
-            },
-            body: {
-              emptyDataSourceMessage: "No se encontraron resultados.",
-              filterRow: {
-                filterTooltip: "Filtrar"
-              }
-            }
-          }}
-        />
+          <TextField
+            id="playerNameInput"
+            label="Nombre del jugador"
+            onChange={event => this.setState({ player: event.target.value })}
+            value={player}
+            onKeyDown={e => {
+              e.keyCode === 13 && this.searchPlayer(player);
+            }}
+          />
+          <Button
+            id="searchPlayersButton"
+            variant="contained"
+            color="primary"
+            onClick={() => this.searchPlayer(player)}
+            size="small"
+          >
+            Buscar jugadores
+          </Button>
+        </CardActions>
+        {this.playersTable()}
         {this.addPlayerModal()}
-      </LayoutWrapper>
+      </SimpleContainer>
     );
   }
 }
