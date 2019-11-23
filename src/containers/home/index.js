@@ -2,7 +2,6 @@ import React from "react";
 import { connect } from "react-redux";
 import { Actions } from "./actions";
 import { bindActionCreators } from "redux";
-import { makeStyles } from "@material-ui/core/styles";
 import Modal from "@material-ui/core/Modal";
 import MaterialTable from "material-table";
 import Button from "@material-ui/core/Button";
@@ -37,7 +36,6 @@ class Home extends React.Component {
   };
 
   addPlayerModal() {
-    const { actions, reducer } = this.props;
     const { addPlayerModalVisible, actualPlayer, trainer } = this.state;
     return (
       <Modal
@@ -79,7 +77,7 @@ class Home extends React.Component {
   }
 
   render() {
-    const { actions, reducer } = this.props;
+    const { reducer } = this.props;
     const { columns, player } = this.state;
     return (
       <LayoutWrapper>
@@ -117,11 +115,11 @@ class Home extends React.Component {
           ]}
           localization={{
             pagination: {
-              labelDisplayedRows: "{from}-{to} of {count}",
+              labelDisplayedRows: "{from}-{to} de {count}",
               labelRowsSelect: "filas"
             },
             toolbar: {
-              nRowsSelected: "{0} row(s) selected",
+              nRowsSelected: "{0} fila(s) seleccionadas",
               searchTooltip: "Filtrar",
               searchPlaceholder: "Filtrar"
             },
