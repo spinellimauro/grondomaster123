@@ -2,142 +2,141 @@ import React from "react";
 import { connect } from "react-redux";
 import { Actions } from "./actions";
 import { bindActionCreators } from "redux";
-import { Table, Row, Col, Card, Button, Icon, Input, Modal } from "antd";
-import firebase from "firebase";
-import { FirebaseConfiguration } from "../../config/firebase";
+import { makeStyles } from "@material-ui/core/styles";
+import Modal from "@material-ui/core/Modal";
+import MaterialTable from "material-table";
+import Button from "@material-ui/core/Button";
+import TextField from "@material-ui/core/TextField";
 import { rowStyle, colStyle, gutter } from "./styles";
 import LayoutWrapper from "../../components/layoutWrapper";
-import PageHeader from "../../components/pageHeader";
-
-const DescriptionItem = ({ title, content }) => (
-  <div
-    style={{
-      fontSize: 14,
-      lineHeight: "20px",
-      marginBottom: 7,
-      color: "rgba(0,0,0,0.65)"
-    }}
-  >
-    <p
-      style={{
-        marginRight: 8,
-        display: "inline-block",
-        color: "rgba(0,0,0,0.85)"
-      }}
-    >
-      {title}:
-    </p>
-    {content != "" ? content : "-"}
-  </div>
-);
 
 class Home extends React.Component {
-  componentDidMount() {
-    firebase.initializeApp(FirebaseConfiguration);
-  }
-
   constructor(props) {
     super(props);
     this.state = {
       addPlayerModalVisible: false,
-      actualPlayer: undefined
+      actualPlayer: { name: "", overall_rating: "" },
+      player: "",
+      trainer: "",
+      columns: [
+        { title: "Nombre", field: "name" },
+        { title: "Valor", field: "value" },
+        { title: "Rating", field: "overall_rating" }
+      ]
     };
   }
 
-  addPlayerModal(player) {
+  searchPlayer = player => {
+    this.props.actions.buscadorSofifa({
+      nombreJugador: player
+    });
+  };
+
+  savePlayer = request => {
+    this.props.actions.savePlayer(request);
+  };
+
+  addPlayerModal() {
+    const { actions, reducer } = this.props;
+    const { addPlayerModalVisible, actualPlayer, trainer } = this.state;
     return (
       <Modal
-        title={player.name}
-        visible={this.state.addPlayerModalVisible}
-        onCancel={e => {
-          this.setState({
-            addPlayerModalVisible: false
-          });
+        aria-labelledby="simple-modal-title"
+        aria-describedby="simple-modal-description"
+        open={addPlayerModalVisible}
+        onClose={() => this.setState({ addPlayerModalVisible: false })}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center"
         }}
-        width={700}
-        footer={null}
       >
-        <Row>
-          <Col md={24} style={colStyle}>
-            <Row style={rowStyle}>
-              <Col md={12} style={colStyle}>
-                <DescriptionItem
-                  title="Nivel"
-                  content={player.overall_rating}
-                />
-                <DescriptionItem title="ID" content={player.id} />
-              </Col>
-              <Col md={12} style={colStyle}>
-                <DescriptionItem title="Valor" content={player.value} />
-              </Col>
-            </Row>
-          </Col>
-        </Row>
+        <div style={{ backgroundColor: "white" }}>
+          <h2 id="simple-modal-title">{actualPlayer.name}</h2>
+          <p id="simple-modal-description">{actualPlayer.overall_rating}</p>
+          <TextField
+            id="trainerName"
+            label="Nombre del DT"
+            onChange={event => this.setState({ trainer: event.target.value })}
+            value={trainer}
+            onKeyDown={e => {
+              e.keyCode === 13 &&
+                this.savePlayer({ player: actualPlayer, trainerName: trainer });
+            }}
+          />
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => {
+              this.savePlayer({ player: actualPlayer, trainerName: trainer });
+            }}
+          >
+            Guardar jugador
+          </Button>
+        </div>
       </Modal>
     );
   }
 
   render() {
     const { actions, reducer } = this.props;
+    const { columns, player } = this.state;
     return (
       <LayoutWrapper>
-        <PageHeader>JUGADORES</PageHeader>
-        <Row style={rowStyle} gutter={gutter} justify="start">
-          <Col md={24} style={colStyle}>
-            <Card>
-              <Input.Search
-                placeholder="Filtrar"
-                onSearch={value =>
-                  actions.buscadorSofifa({
-                    nombreJugador: value
-                  })
-                }
-                style={{ marginBottom: 16 }}
-                enterButton
-              />
-              <Table
-                rowKey={record => record.id}
-                columns={[
-                  {
-                    title: "Nombre",
-                    dataIndex: "name",
-                    key: "name"
-                  },
-                  {
-                    title: "Nivel",
-                    dataIndex: "overall_rating",
-                    key: "overall_rating"
-                  },
-                  {
-                    title: "Valor",
-                    dataIndex: "value",
-                    key: "value"
-                  },
-                  {
-                    title: "",
-                    key: "action",
-                    render: (text, record) => (
-                      <Button
-                        onClick={() =>
-                          this.setState({
-                            addPlayerModalVisible: true,
-                            actualPlayer: record
-                          })
-                        }
-                      >
-                        Guardar jugador <Icon type="save" />
-                      </Button>
-                    )
-                  }
-                ]}
-                pagination={{ pageSize: 100 }}
-                dataSource={reducer.jugadores}
-              />
-            </Card>
-          </Col>
-        </Row>
-        {this.state.actualPlayer != undefined &&
-          this.addPlayerModal(this.state.actualPlayer)}
+        <TextField
+          id="standard-basic"
+          label="Nombre del jugador"
+          onChange={event => this.setState({ player: event.target.value })}
+          value={player}
+          onKeyDown={e => {
+            e.keyCode === 13 && this.searchPlayer(player);
+          }}
+        />
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() => this.searchPlayer(player)}
+        >
+          Buscar jugadores
+        </Button>
+        <MaterialTable
+          title="Jugadores"
+          columns={columns}
+          data={reducer.jugadores}
+          actions={[
+            {
+              icon: "save_alt",
+              tooltip: "Guardar jugador",
+              onClick: (event, rowData) => {
+                this.setState({
+                  addPlayerModalVisible: true,
+                  actualPlayer: rowData
+                });
+              }
+            }
+          ]}
+          localization={{
+            pagination: {
+              labelDisplayedRows: "{from}-{to} of {count}",
+              labelRowsSelect: "filas"
+            },
+            toolbar: {
+              nRowsSelected: "{0} row(s) selected",
+              searchTooltip: "Filtrar",
+              searchPlaceholder: "Filtrar"
+            },
+            header: {
+              actions: "Acciones"
+            },
+            body: {
+              emptyDataSourceMessage: "No se encontraron resultados.",
+              filterRow: {
+                filterTooltip: "Filtrar"
+              }
+            }
+          }}
+        />
+        {this.addPlayerModal()}
       </LayoutWrapper>
     );
   }
@@ -155,7 +154,4 @@ function mapDispatchToProps(dispatch) {
   };
 }
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(Home);
+export default connect(mapStateToProps, mapDispatchToProps)(Home);

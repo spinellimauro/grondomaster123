@@ -2,11 +2,11 @@
   "name": "react-redux-sagas-example-",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
   "scripts": {
-    "start": "webpack-dev-server --mode development --open",
-    "dev": "webpack --mode development",
-    "build": "webpack --mode production"
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
   },
   "keywords": [],
   "author": "",
@@ -32,17 +32,19 @@
     "webpack-dev-server": "^3.1.4",
     "styled-components": "^2.2.1",
     "styled-theme": "^0.3.3",
-    "clone": "^2.1.1"
+    "clone": "^2.1.1",
+    "@material-ui/core": "4.7.0"
   },
   "dependencies": {
     "antd": "^3.23.4",
+    "firebase": "^5.8.6",
+    "material-table": "^1.54.1",
     "react": "^16.4.1",
     "react-dom": "^16.4.1",
     "react-redux": "^5.0.7",
     "redux": "^4.0.0",
     "redux-logger": "^3.0.6",
     "redux-saga": "^0.16.0",
-    "redux-thunk": "^2.3.0",
-    "firebase": "^5.8.6"
+    "redux-thunk": "^2.3.0"
   }
 }
