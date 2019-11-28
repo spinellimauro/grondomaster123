@@ -8,7 +8,7 @@ export const SimpleContainer = props => {
   return (
     <React.Fragment>
       <CssBaseline />
-      <Container maxWidth="sm">
+      <Container maxWidth="sm" style={{ flex: 1 }}>
         <Typography component="div" style={{ backgroundColor: "#cfe8fc" }}>
           {children}
         </Typography>

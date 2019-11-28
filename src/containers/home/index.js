@@ -8,6 +8,8 @@ import Button from "@material-ui/core/Button";
 import TextField from "@material-ui/core/TextField";
 import CardActions from "@material-ui/core/CardActions";
 import { SimpleContainer } from "../../components/container";
+import { Container } from "@material-ui/core";
+import { Redirect } from "react-router-dom";
 
 class Home extends React.Component {
   constructor(props) {
@@ -40,6 +42,7 @@ class Home extends React.Component {
     const { columns } = this.state;
     return (
       <MaterialTable
+        isLoading={reducer.loading}
         title="Jugadores"
         columns={columns}
         data={reducer.jugadores}
@@ -127,6 +130,7 @@ class Home extends React.Component {
 
   render() {
     const { player } = this.state;
+    const { reducer } = this.props;
     return (
       <SimpleContainer>
         <CardActions
@@ -153,6 +157,20 @@ class Home extends React.Component {
         </CardActions>
         {this.playersTable()}
         {this.addPlayerModal()}
+        <CardActions
+          style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
+        >
+          <Button
+            id="logOutButton"
+            variant="contained"
+            color="primary"
+            onClick={() => this.props.actions.signOutRequest()}
+            size="small"
+          >
+            Desloguearse
+          </Button>
+        </CardActions>
+        {reducer.signOutSuccess && <Redirect to={{ pathname: "/login" }} />}
       </SimpleContainer>
     );
   }

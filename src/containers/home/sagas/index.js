@@ -1,8 +1,9 @@
 import { put, takeLatest, all, call } from "redux-saga/effects";
 import { ActionsTypes, Actions } from "../actions";
 import { insertPlayer } from "../../../services/homeService";
+import { userSignOut } from "../../../services/loginService";
 
-function* fetchRandomName(action) {
+function* fetchSearchPlayers(action) {
   const json = yield fetch(
     "http://sofifa-api.herokuapp.com/api/v1/players/?name=" +
       action.request.nombreJugador
@@ -31,10 +32,21 @@ function* fetchSavePlayer(action) {
   }
 }
 
+function* fetchUserSignOut(action) {
+  try {
+    yield call(userSignOut);
+    yield put(Actions.signOutSuccess());
+  } catch (e) {
+    console.log(e);
+    alert("Hubo un error en el sistema. Intente más tarde.");
+  }
+  yield put(Actions.clearState());
+}
+
 function* actionWatcher() {
   yield takeLatest(ActionsTypes.SAVE_PLAYER, fetchSavePlayer);
-  yield takeLatest(ActionsTypes.GET_RANDOM_NAME, fetchRandomName);
-  yield takeLatest(ActionsTypes.BUSCADOR_SOFIFA, fetchRandomName);
+  yield takeLatest(ActionsTypes.BUSCADOR_SOFIFA, fetchSearchPlayers);
+  yield takeLatest(ActionsTypes.USER_SIGN_OUT_REQUEST, fetchUserSignOut);
 }
 
 export default function* homeSaga() {
