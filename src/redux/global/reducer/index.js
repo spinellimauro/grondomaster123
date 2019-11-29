@@ -1,7 +1,7 @@
 import { ActionsTypes } from "../actions";
 
 const initialState = {
-  user: {},
+  user: null,
   auth_listener: null
 };
 

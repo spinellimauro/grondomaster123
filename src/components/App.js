@@ -27,34 +27,6 @@ function Copyright() {
   );
 }
 
-const isAuthenticated = () => {
-  const listener = firebase.auth().onAuthStateChanged(user => {
-    if (user) {
-      return true;
-    }
-    return false;
-  });
-};
-
-function PrivateRoute({ component: Component, ...rest }) {
-  return (
-    <Route
-      {...rest}
-      render={() =>
-        isAuthenticated() ? (
-          <Component />
-        ) : (
-          <Redirect
-            to={{
-              pathname: "/login"
-            }}
-          />
-        )
-      }
-    />
-  );
-}
-
 class App extends Component {
   constructor(props) {
     super(props);
@@ -95,7 +67,11 @@ class App extends Component {
           <BrowserRouter>
             <Switch>
               <Route path="/login" exact component={() => <Login />} />
-              <Route path="/home" exact component={() => <Home />} />
+              <Route
+                path={this.state.isAuthenticated ? "/home" : "/login"}
+                exact
+                component={() => <Home />}
+              />
               {this.state.loading ? (
                 <CircularProgress />
               ) : !this.state.isAuthenticated ? (
